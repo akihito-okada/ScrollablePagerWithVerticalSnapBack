@@ -15,7 +15,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -25,8 +25,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -42,14 +40,10 @@ import kotlin.math.roundToInt
 fun VerticalSwipePagerSet(
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
     val offsetY = remember { Animatable(0f) }
 
-    val screenHeightPx = with(LocalDensity.current) {
-        LocalConfiguration.current.screenHeightDp.dp.toPx()
-    }
     val threshold = with(LocalDensity.current) { 100.dp.toPx() }
     val maxOffset = threshold + 1
 
@@ -65,7 +59,7 @@ fun VerticalSwipePagerSet(
         }
     }
 
-    var currentSetIndex by remember { mutableStateOf(0) }
+    var currentSetIndex by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = modifier
