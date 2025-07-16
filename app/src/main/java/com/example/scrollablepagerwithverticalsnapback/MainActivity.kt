@@ -4,11 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
-import com.example.scrollablepagerwithverticalsnapback.ui.VerticalSwipePagerSet
+import com.example.scrollablepagerwithverticalsnapback.ui.AppNavHost
 import com.example.scrollablepagerwithverticalsnapback.ui.theme.ScrollablePagerWithVerticalSnapBackTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,13 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ScrollablePagerWithVerticalSnapBackTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    VerticalSwipePagerSet(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                    )
-                }
+                AppNavHost()
             }
         }
     }

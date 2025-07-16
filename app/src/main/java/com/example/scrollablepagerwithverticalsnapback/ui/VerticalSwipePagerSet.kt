@@ -35,17 +35,12 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-
 @Composable
 fun VerticalSwipePagerSet(
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
-    val offsetY = remember { Animatable(0f) }
-
-    val threshold = with(LocalDensity.current) { 100.dp.toPx() }
-    val maxOffset = threshold + 1
 
     val colorSets = remember {
         List(10) { setIndex ->
@@ -60,6 +55,53 @@ fun VerticalSwipePagerSet(
     }
 
     var currentSetIndex by remember { mutableIntStateOf(0) }
+
+    SwipePagerContainer(
+        modifier = modifier,
+        onSwipeUp = {
+            currentSetIndex = (currentSetIndex + 1) % colorSets.size
+            coroutineScope.launch { pagerState.scrollToPage(0) }
+        },
+        onSwipeDown = {
+            currentSetIndex = (currentSetIndex - 1 + colorSets.size) % colorSets.size
+            coroutineScope.launch { pagerState.scrollToPage(0) }
+        },
+        pagerContent = { offsetY ->
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(0, offsetY.roundToInt()) }
+            ) { page ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(colorSets[currentSetIndex][page]),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Page $page\nSet ${currentSetIndex + 1}",
+                        fontSize = 24.sp,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun SwipePagerContainer(
+    modifier: Modifier = Modifier,
+    onSwipeUp: () -> Unit,
+    onSwipeDown: () -> Unit,
+    pagerContent: @Composable (offsetY: Float) -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val offsetY = remember { Animatable(0f) }
+
+    val threshold: Float = with(LocalDensity.current) { 100.dp.toPx() }
+    val maxOffset: Float = threshold + 1
 
     Box(
         modifier = modifier
@@ -96,12 +138,9 @@ fun VerticalSwipePagerSet(
                     if (dragDirection == DragDirection.Vertical) {
                         coroutineScope.launch {
                             if (offsetY.value > threshold) {
-                                currentSetIndex =
-                                    (currentSetIndex - 1 + colorSets.size) % colorSets.size
-                                pagerState.scrollToPage(0)
+                                onSwipeDown()
                             } else if (offsetY.value < -threshold) {
-                                currentSetIndex = (currentSetIndex + 1) % colorSets.size
-                                pagerState.scrollToPage(0)
+                                onSwipeUp()
                             }
                             offsetY.animateTo(0f, animationSpec = tween(300))
                         }
@@ -126,25 +165,8 @@ fun VerticalSwipePagerSet(
             color = Color.Gray
         )
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .offset { IntOffset(0, offsetY.value.roundToInt()) }
-        ) { page ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(colorSets[currentSetIndex][page]),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Page $page\nSet ${currentSetIndex + 1}",
-                    fontSize = 24.sp,
-                    color = Color.White
-                )
-            }
-        }
+        // 中身は差し替え可能
+        pagerContent(offsetY.value)
     }
 }
 
